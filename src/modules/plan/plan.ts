@@ -10,6 +10,7 @@ export type PlanItem = {
 export type Plan = {
   items: PlanItem[];
   budgetMinutes: number;
+  neededMinutes: number; // tổng số phút của các chủ đề cần cho mục tiêu
   reachable: boolean; // mọi chủ đề cần cho mục tiêu đều nằm trong quỹ thời gian
 };
 
@@ -25,9 +26,11 @@ export function buildPlan(topics: ScoredTopic[], goal: Goal): Plan {
   // Phần kiến thức (theo độ quan trọng) coi như đã nắm
   let coverage = topics.reduce((sum, t) => sum + t.importance * t.mastery, 0) / total;
   let minutes = 0;
+  // Chặn chia cho 0 nếu model trả estMinutes = 0
+  const perMinute = (t: ScoredTopic) => t.heat / Math.max(1, t.estMinutes);
 
   const items = [...topics]
-    .sort((a, b) => b.heat / b.estMinutes - a.heat / a.estMinutes)
+    .sort((a, b) => perMinute(b) - perMinute(a))
     .map((topic) => {
       const neededForTarget = coverage < target;
       minutes += topic.estMinutes;
@@ -38,6 +41,7 @@ export function buildPlan(topics: ScoredTopic[], goal: Goal): Plan {
   return {
     items,
     budgetMinutes,
+    neededMinutes: items.filter((i) => i.neededForTarget).reduce((sum, i) => sum + i.topic.estMinutes, 0),
     reachable: items.every((i) => !i.neededForTarget || i.inBudget),
   };
 }

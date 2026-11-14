@@ -8,6 +8,7 @@ import { Button } from '@/core/ui';
 import { reasons } from './reasons';
 
 const RATING_LABELS = ['Chưa biết', 'Lơ mơ', 'Nắm chắc'];
+const LEGEND = [0.1, 0.3, 0.5, 0.7, 0.9];
 
 export default function HeatmapScreen() {
   const router = useRouter();
@@ -25,7 +26,22 @@ export default function HeatmapScreen() {
         data={topics}
         keyExtractor={(t) => t.id}
         contentContainerStyle={styles.list}
-        ListHeaderComponent={<Text style={styles.course}>{analysis.course}</Text>}
+        ListHeaderComponent={
+          <View style={styles.header}>
+            <Text style={styles.course}>{analysis.course}</Text>
+            <Text style={styles.hint}>
+              Chủ đề nóng nhất ở trên cùng: quan trọng mà chưa nắm. Tự đánh giá từng chủ đề, chạm vào chủ
+              đề để ôn và làm câu hỏi.
+            </Text>
+            <View style={styles.legend}>
+              <Text style={styles.hint}>Nguội</Text>
+              {LEGEND.map((h) => (
+                <View key={h} style={[styles.swatch, { backgroundColor: heatColor(h) }]} />
+              ))}
+              <Text style={styles.hint}>Nóng</Text>
+            </View>
+          </View>
+        }
         renderItem={({ item }) => {
           const textColor = heatTextColor(item.heat);
           return (
@@ -36,11 +52,15 @@ export default function HeatmapScreen() {
               <Text style={{ color: textColor }}>
                 {item.chapter} · {reasons(item).join(' · ')}
               </Text>
+              <Text style={{ color: textColor }}>Đã nắm {Math.round(item.mastery * 100)}%</Text>
               <View style={styles.ratings}>
                 {RATING_LABELS.map((label, level) => (
                   <Pressable
                     key={label}
-                    style={[styles.chip, item.mastery === SELF_RATING[level] && styles.chipActive]}
+                    style={[
+                      styles.chip,
+                      mastery[item.id] === SELF_RATING[level] && styles.chipActive,
+                    ]}
                     onPress={() => rateTopic(item.id, level as SelfRatingLevel)}>
                     <Text style={styles.chipText}>{label}</Text>
                   </Pressable>
@@ -61,7 +81,11 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   empty: { padding: spacing.md, color: colors.muted },
   list: { padding: spacing.md, gap: spacing.sm },
-  course: { fontSize: 16, color: colors.muted, marginBottom: spacing.sm },
+  header: { gap: spacing.sm, marginBottom: spacing.sm },
+  course: { fontSize: 16, color: colors.muted },
+  hint: { fontSize: 13, color: colors.muted },
+  legend: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
+  swatch: { width: 24, height: 12, borderRadius: 3 },
   card: { padding: spacing.md, borderRadius: 12, gap: spacing.xs },
   title: { fontSize: 17, fontWeight: '700' },
   ratings: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm },

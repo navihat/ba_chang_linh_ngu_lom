@@ -6,6 +6,14 @@ import { useStore } from '@/core/store';
 import { colors, heatColor, spacing } from '@/core/theme';
 import { buildPlan } from './plan';
 
+// 150 → "2 giờ 30 phút"
+function formatMinutes(total: number): string {
+  const h = Math.floor(total / 60);
+  const m = Math.round(total % 60);
+  if (h === 0) return `${m} phút`;
+  return m === 0 ? `${h} giờ` : `${h} giờ ${m} phút`;
+}
+
 export default function PlanScreen() {
   const router = useRouter();
   const analysis = useStore((s) => s.analysis);
@@ -26,7 +34,10 @@ export default function PlanScreen() {
       ListHeaderComponent={
         <View style={styles.header}>
           <Text style={styles.goal}>
-            Mục tiêu {goal.targetGrade} điểm · còn {plan.budgetMinutes} phút
+            Mục tiêu {goal.targetGrade} điểm · còn {formatMinutes(plan.budgetMinutes)}
+          </Text>
+          <Text style={styles.meta}>
+            Cần khoảng {formatMinutes(plan.neededMinutes)} cho các chủ đề cần để đạt mục tiêu.
           </Text>
           <Text style={{ color: plan.reachable ? colors.correct : colors.wrong }}>
             {plan.reachable
@@ -47,8 +58,10 @@ export default function PlanScreen() {
                 {index + 1}. {item.topic.title}
               </Text>
               <Text style={styles.meta}>
-                {item.topic.estMinutes} phút · xong ở phút {item.endMinute} ·{' '}
-                {item.neededForTarget ? 'cần cho mục tiêu' : 'học thêm để lên điểm'}
+                {item.topic.estMinutes} phút · xong sau {formatMinutes(item.endMinute)}
+              </Text>
+              <Text style={item.neededForTarget ? styles.needed : styles.meta}>
+                {item.neededForTarget ? 'Cần cho mục tiêu' : 'Học thêm để lên điểm'}
               </Text>
             </View>
           </Pressable>
@@ -86,4 +99,5 @@ const styles = StyleSheet.create({
   body: { flex: 1, gap: spacing.xs },
   title: { fontSize: 16, fontWeight: '600', color: colors.text },
   meta: { color: colors.muted, fontSize: 13 },
+  needed: { color: colors.primary, fontSize: 13, fontWeight: '700' },
 });
