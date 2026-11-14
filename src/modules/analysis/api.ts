@@ -30,6 +30,10 @@ export async function analyzeDocuments(files: PickedFiles): Promise<Analysis> {
     }
   }
   const res = await fetch(`${API_URL}/analyze`, { method: 'POST', body: form });
-  if (!res.ok) throw new Error(`/analyze lỗi ${res.status}`);
+  if (!res.ok) {
+    // Server trả { error } bằng tiếng Việt; nếu không đọc được thì báo mã lỗi
+    const body = await res.json().catch(() => null);
+    throw new Error(body?.error ?? `/analyze lỗi ${res.status}`);
+  }
   return res.json();
 }
