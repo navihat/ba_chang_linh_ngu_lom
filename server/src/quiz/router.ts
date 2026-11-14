@@ -29,12 +29,12 @@ const QuizSchema = z.object({
 });
 
 quizRouter.post('/quiz', async (req, res) => {
-  const { topic, count = 3 } = req.body as QuizRequest;
+  const { topic, count = 10 } = req.body as QuizRequest;
   if (!topic?.id) {
     res.status(400).json({ error: 'Thiếu topic' });
     return;
   }
-  const n = Math.min(5, Math.max(1, count));
+  const n = Math.min(10, Math.max(1, count));
 
   try {
     const questions = process.env.OPENAI_API_KEY ? await generate(topic, n) : mock(topic, n);
