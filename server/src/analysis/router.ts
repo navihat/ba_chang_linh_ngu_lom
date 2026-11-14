@@ -13,6 +13,25 @@ type UploadedFile = {
 };
 
 const MAX_TOTAL_BYTES = 50 * 1024 * 1024;
+// Đuôi file hợp lệ và MIME gửi cho OpenAI. Điện thoại hay gửi sai mimetype nên xét theo đuôi trước.
+const MIME_BY_EXT: Record<string, string> = {
+  pdf: 'application/pdf',
+  docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  txt: 'text/plain',
+  md: 'text/markdown',
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  png: 'image/png',
+  webp: 'image/webp',
+};
+const ALLOWED_MIMES = new Set(Object.values(MIME_BY_EXT));
+
+function mimeOf(file: UploadedFile): string | undefined {
+  const ext = file.originalname.toLowerCase().split('.').pop() ?? '';
+  return MIME_BY_EXT[ext] ?? (ALLOWED_MIMES.has(file.mimetype) ? file.mimetype : undefined);
+}
+
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: MAX_TOTAL_BYTES, files: 20 } });
 
 export const analysisRouter = Router();
@@ -77,29 +96,29 @@ function getFiles(req: Request): Record<'syllabus' | 'slides' | 'exams', Uploade
 }
 
 function validateFiles(files: Record<'syllabus' | 'slides' | 'exams', UploadedFile[]>): string | null {
-  if (files.syllabus.length !== 1) return 'Cần đúng 1 file đề cương PDF.';
-  if (files.slides.length < 1) return 'Cần ít nhất 1 file slide PDF.';
+  if (files.syllabus.length !== 1) return 'Cần đúng 1 file đề cương.';
+  if (files.slides.length < 1) return 'Cần ít nhất 1 file slide.';
 
   const all = [...files.syllabus, ...files.slides, ...files.exams];
-  const nonPdf = all.find((f) => f.mimetype !== 'application/pdf' && !f.originalname.toLowerCase().endsWith('.pdf'));
-  if (nonPdf) return `File ${nonPdf.originalname} không phải PDF.`;
+  const unsupported = all.find((f) => !mimeOf(f));
+  if (unsupported) return `File ${unsupported.originalname} không hỗ trợ. Chỉ nhận PDF, Word, PowerPoint, TXT, MD và ảnh JPG, PNG, WEBP.`;
 
   const totalBytes = all.reduce((sum, f) => sum + f.size, 0);
-  if (totalBytes > MAX_TOTAL_BYTES) return 'Tổng dung lượng PDF vượt 50 MB. Hãy chia slide theo chương.';
+  if (totalBytes > MAX_TOTAL_BYTES) return 'Tổng dung lượng tài liệu vượt 50 MB. Hãy chia slide theo chương.';
 
   return null;
 }
 
 function toInputParts(kind: string, file: UploadedFile, index: number) {
-  return [
-    { type: 'input_text', text: `Tài liệu ${kind} ${index + 1}: ${file.originalname}` },
-    {
-      type: 'input_file',
-      filename: file.originalname,
-      file_data: `data:application/pdf;base64,${file.buffer.toString('base64')}`,
-      detail: 'low',
-    },
-  ];
+  const mime = mimeOf(file)!;
+  const dataUrl = `data:${mime};base64,${file.buffer.toString('base64')}`;
+  // Ảnh gửi dạng input_image để model đọc được chữ trong ảnh chụp; còn lại là input_file
+  const content = mime.startsWith('image/')
+    ? { type: 'input_image', image_url: dataUrl, detail: 'auto' }
+    : mime === 'application/pdf'
+      ? { type: 'input_file', filename: file.originalname, file_data: dataUrl, detail: 'low' }
+      : { type: 'input_file', filename: file.originalname, file_data: dataUrl };
+  return [{ type: 'input_text', text: `Tài liệu ${kind} ${index + 1}: ${file.originalname}` }, content];
 }
 
 function normalizeAnalysis(analysis: Analysis): Analysis {
@@ -145,7 +164,7 @@ async function analyzeWithOpenAI(files: Record<'syllabus' | 'slides' | 'exams', 
             type: 'input_text',
             text: [
               'Bạn là trợ lý phân tích tài liệu học phần cho app Chú Tủng.',
-              'Hãy đọc các PDF: đề cương, slide và đề thi cũ nếu có.',
+              'Hãy đọc các tài liệu (PDF, Word, PowerPoint, văn bản hoặc ảnh chụp): đề cương, slide và đề thi cũ nếu có.',
               'Trả về JSON đúng schema Analysis. Không thêm markdown, không giải thích ngoài JSON.',
               'Chỉ trích tín hiệu từ tài liệu, không tự chấm điểm quan trọng, độ nóng hay mức nắm.',
               'course: tên học phần ngắn gọn.',
@@ -182,7 +201,7 @@ async function analyzeWithOpenAI(files: Record<'syllabus' | 'slides' | 'exams', 
   return normalizeAnalysis(JSON.parse(text) as Analysis);
 }
 
-// multipart: syllabus (1 PDF), slides (nhiều PDF), exams (nhiều PDF, tùy chọn)
+// multipart: syllabus (1 file), slides (nhiều file), exams (nhiều file, tùy chọn). Loại file xem MIME_BY_EXT
 analysisRouter.post(
   '/analyze',
   upload.fields([{ name: 'syllabus', maxCount: 1 }, { name: 'slides' }, { name: 'exams' }]),
