@@ -8,7 +8,7 @@ import { colors, spacing } from '@/core/theme';
 import { Button } from '@/core/ui';
 import sample from '@shared/sample/csdl.json';
 import type { Analysis } from '@shared/types';
-import { analyzeDocuments, type DocKind, type PickedFiles } from './api';
+import { ACCEPTED_TYPES, analyzeDocuments, type DocKind, type PickedFiles } from './api';
 
 const KIND_LABELS: Record<DocKind, string> = {
   syllabus: 'Đề cương học phần',
@@ -30,7 +30,7 @@ export default function UploadScreen() {
 
   async function pick(kind: DocKind) {
     const result = await DocumentPicker.getDocumentAsync({
-      type: 'application/pdf',
+      type: ACCEPTED_TYPES,
       multiple: kind !== 'syllabus',
     });
     if (!result.canceled) setFiles((f) => ({ ...f, [kind]: result.assets }));
@@ -68,7 +68,8 @@ export default function UploadScreen() {
         </View>
       </View>
 
-      <Text style={styles.heading}>Tài liệu (PDF)</Text>
+      <Text style={styles.heading}>Tài liệu</Text>
+      <Text style={styles.label}>Nhận PDF, Word, PowerPoint, TXT, MD và ảnh chụp (JPG, PNG, WEBP).</Text>
       {(Object.keys(KIND_LABELS) as DocKind[]).map((kind) => (
         <View key={kind} style={styles.doc}>
           <Text style={styles.label}>
