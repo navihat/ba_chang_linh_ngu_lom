@@ -1,0 +1,75 @@
+{
+  "course": "Cơ sở dữ liệu (DỮ LIỆU GIẢ - thay bằng kết quả phân tích thật)",
+  "clos": [
+    { "id": "CLO1", "text": "Trình bày được các khái niệm cơ bản của hệ cơ sở dữ liệu" },
+    { "id": "CLO2", "text": "Thiết kế được lược đồ cơ sở dữ liệu từ yêu cầu bài toán" },
+    { "id": "CLO3", "text": "Vận dụng đại số quan hệ và SQL để truy vấn dữ liệu" },
+    { "id": "CLO4", "text": "Phân tích phụ thuộc hàm và chuẩn hóa lược đồ quan hệ" }
+  ],
+  "topics": [
+    {
+      "id": "t1",
+      "title": "Tổng quan hệ CSDL và kiến trúc 3 mức",
+      "chapter": "Chương 1",
+      "summary": "Dữ liệu, CSDL, hệ quản trị CSDL\nKiến trúc 3 mức: ngoài, khái niệm, trong\nĐộc lập dữ liệu logic và vật lý",
+      "signals": { "hours": 3, "cloIds": ["CLO1"], "bloom": 2, "pastExamHits": 1, "slidePages": [1, 2, 3, 4] },
+      "estMinutes": 20
+    },
+    {
+      "id": "t2",
+      "title": "Mô hình thực thể - liên kết (ER)",
+      "chapter": "Chương 2",
+      "summary": "Thực thể, thuộc tính, khóa\nLiên kết và bản số 1-1, 1-n, n-n\nThực thể yếu, chuyên biệt hóa\nVẽ sơ đồ ER từ mô tả bài toán",
+      "signals": { "hours": 6, "cloIds": ["CLO2"], "bloom": 3, "pastExamHits": 3, "slidePages": [5, 6, 7, 8, 9] },
+      "estMinutes": 40
+    },
+    {
+      "id": "t3",
+      "title": "Mô hình quan hệ và chuyển ER sang quan hệ",
+      "chapter": "Chương 3",
+      "summary": "Quan hệ, bộ, thuộc tính, miền giá trị\nKhóa chính, khóa ngoại, ràng buộc toàn vẹn\nQuy tắc chuyển ER sang lược đồ quan hệ",
+      "signals": { "hours": 4, "cloIds": ["CLO2"], "bloom": 3, "pastExamHits": 2, "slidePages": [10, 11, 12] },
+      "estMinutes": 30
+    },
+    {
+      "id": "t4",
+      "title": "Đại số quan hệ",
+      "chapter": "Chương 4",
+      "summary": "Chọn, chiếu, đổi tên\nHợp, giao, trừ, tích Descartes\nCác phép kết và phép chia\nViết biểu thức cho truy vấn cho trước",
+      "signals": { "hours": 6, "cloIds": ["CLO3"], "bloom": 3, "pastExamHits": 3, "slidePages": [13, 14, 15, 16] },
+      "estMinutes": 45
+    },
+    {
+      "id": "t5",
+      "title": "SQL: SELECT, JOIN, GROUP BY",
+      "chapter": "Chương 5",
+      "summary": "SELECT ... FROM ... WHERE\nINNER JOIN, LEFT JOIN\nGROUP BY, HAVING và hàm gộp\nORDER BY, DISTINCT",
+      "signals": { "hours": 8, "cloIds": ["CLO3"], "bloom": 3, "pastExamHits": 5, "slidePages": [17, 18, 19, 20, 21, 22] },
+      "estMinutes": 60
+    },
+    {
+      "id": "t6",
+      "title": "SQL: truy vấn lồng và ràng buộc toàn vẹn",
+      "chapter": "Chương 5",
+      "summary": "Truy vấn con với IN, EXISTS, ALL, ANY\nTruy vấn con tương quan\nPRIMARY KEY, FOREIGN KEY, CHECK",
+      "signals": { "hours": 4, "cloIds": ["CLO3"], "bloom": 4, "pastExamHits": 2, "slidePages": [23, 24, 25] },
+      "estMinutes": 40
+    },
+    {
+      "id": "t7",
+      "title": "Phụ thuộc hàm và chuẩn hóa (1NF - BCNF)",
+      "chapter": "Chương 6",
+      "summary": "Phụ thuộc hàm, hệ tiên đề Armstrong\nBao đóng của tập thuộc tính, tìm khóa\nCác dạng chuẩn 1NF, 2NF, 3NF, BCNF\nPhân rã bảo toàn thông tin",
+      "signals": { "hours": 8, "cloIds": ["CLO2", "CLO4"], "bloom": 4, "pastExamHits": 4, "slidePages": [26, 27, 28, 29, 30, 31] },
+      "estMinutes": 60
+    },
+    {
+      "id": "t8",
+      "title": "Giao tác và điều khiển tương tranh",
+      "chapter": "Chương 7",
+      "summary": "Giao tác và tính chất ACID\nLịch trình khả tuần tự\nKhóa hai pha",
+      "signals": { "hours": 3, "cloIds": ["CLO1"], "bloom": 2, "pastExamHits": 1, "slidePages": [32, 33, 34] },
+      "estMinutes": 25
+    }
+  ]
+}
