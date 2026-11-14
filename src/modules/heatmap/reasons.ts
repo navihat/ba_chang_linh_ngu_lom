@@ -7,5 +7,10 @@ export function reasons(topic: Topic): string[] {
   const s = topic.signals;
   const list = [`${s.hours} tiết`, s.cloIds.join(', '), `mức ${BLOOM[s.bloom] ?? s.bloom}`];
   if (s.pastExamHits > 0) list.unshift(`${s.pastExamHits} câu trong đề cũ`);
+  if (s.slidePages.length > 0) {
+    const first = Math.min(...s.slidePages);
+    const last = Math.max(...s.slidePages);
+    list.push(first === last ? `slide tr. ${first}` : `slide tr. ${first}–${last}`);
+  }
   return list;
 }

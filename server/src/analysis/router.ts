@@ -61,7 +61,7 @@ const analysisSchema = {
       items: {
         type: 'object',
         additionalProperties: false,
-        required: ['id', 'title', 'chapter', 'summary', 'signals', 'estMinutes'],
+        required: ['id', 'title', 'chapter', 'summary', 'signals', 'estMinutes', 'quotes'],
         properties: {
           id: { type: 'string' },
           title: { type: 'string' },
@@ -80,6 +80,19 @@ const analysisSchema = {
             },
           },
           estMinutes: { type: 'number', minimum: 5 },
+          quotes: {
+            type: 'array',
+            items: {
+              type: 'object',
+              additionalProperties: false,
+              required: ['source', 'page', 'text'],
+              properties: {
+                source: { type: 'string' },
+                page: { type: 'number' },
+                text: { type: 'string' },
+              },
+            },
+          },
         },
       },
     },
@@ -143,6 +156,10 @@ function normalizeTopic(topic: Topic, index: number): Topic {
       slidePages: topic.signals.slidePages.map((page) => Math.round(page)).filter((page) => page > 0),
     },
     estMinutes: Math.max(5, Math.round(topic.estMinutes)),
+    quotes: (topic.quotes ?? [])
+      .map((q) => ({ source: q.source.trim(), page: Math.max(0, Math.round(q.page)), text: q.text.trim() }))
+      .filter((q) => q.text)
+      .slice(0, 3),
   };
 }
 
@@ -177,6 +194,7 @@ async function analyzeWithOpenAI(files: Record<'syllabus' | 'slides' | 'exams', 
               'signals.pastExamHits: số lần/chủ điểm xuất hiện trong đề thi cũ; không có đề cũ thì để 0.',
               'signals.slidePages: số trang slide liên quan.',
               'estMinutes: số phút ôn ước tính cho sinh viên trước kỳ thi, tối thiểu 5.',
+              'quotes: 1-3 đoạn trích NGUYÊN VĂN, mỗi đoạn dưới 200 ký tự, chép đúng từng chữ trong slide hoặc giáo trình (không diễn đạt lại, không bịa), kèm tên file ở source và số trang ở page (0 nếu không rõ). Không tìm được đoạn phù hợp thì để mảng rỗng.',
               'Đặt id chủ đề ổn định dạng t1, t2, t3 theo thứ tự học hợp lý.',
             ].join('\n'),
           },

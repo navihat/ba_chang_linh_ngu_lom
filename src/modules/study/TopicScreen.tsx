@@ -1,4 +1,4 @@
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
@@ -10,6 +10,7 @@ import { fetchQuiz } from './api';
 const BLOOM_LABELS = ['Nhớ', 'Hiểu', 'Vận dụng', 'Phân tích', 'Đánh giá', 'Sáng tạo'];
 
 export default function TopicScreen() {
+  const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const topic = useStore((s) => s.analysis?.topics.find((t) => t.id === id));
   const questions = useStore((s) => s.questions[id]);
@@ -60,6 +61,7 @@ export default function TopicScreen() {
       <Text style={styles.muted}>
         {topic.chapter} · Mức Bloom: {bloom} · Mức nắm: {Math.round(mastery * 100)}%
       </Text>
+      <Button label="Xem heatmap của bạn" variant="secondary" onPress={() => router.push('/heatmap')} />
 
       <Text style={styles.heading}>Tóm tắt</Text>
       {topic.summary.split('\n').map((line, i) => (
@@ -67,6 +69,21 @@ export default function TopicScreen() {
           • {line}
         </Text>
       ))}
+
+      {topic.quotes?.length ? (
+        <>
+          <Text style={styles.heading}>Trích từ tài liệu</Text>
+          {topic.quotes.map((q, i) => (
+            <View key={i} style={styles.quote}>
+              <Text style={styles.text}>“{q.text}”</Text>
+              <Text style={styles.muted}>
+                {q.source}
+                {q.page > 0 ? `, trang ${q.page}` : ''}
+              </Text>
+            </View>
+          ))}
+        </>
+      ) : null}
 
       <Text style={styles.heading}>Câu hỏi nhanh</Text>
       {loading ? <ActivityIndicator color={colors.primary} /> : null}
@@ -121,6 +138,7 @@ const styles = StyleSheet.create({
   muted: { color: colors.muted },
   result: { fontSize: 16, fontWeight: '600', color: colors.text },
   question: { gap: spacing.sm, marginBottom: spacing.md },
+  quote: { gap: spacing.xs, paddingLeft: spacing.sm, borderLeftWidth: 3, borderLeftColor: colors.border },
   choice: {
     padding: spacing.md,
     borderRadius: 12,
