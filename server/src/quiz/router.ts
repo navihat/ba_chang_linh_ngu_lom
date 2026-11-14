@@ -59,6 +59,7 @@ async function generate(topic: Topic, n: number): Promise<Question[]> {
       `Chương: ${topic.chapter}\nChủ đề: ${topic.title}\nTóm tắt:\n${topic.summary}\n\n` +
       `Viết ${n} câu hỏi ở mức Bloom ${bloom} (${BLOOM[bloom - 1]}).`,
     text: { format: zodTextFormat(QuizSchema, 'quiz') },
+    reasoning: { effort: 'low' }, // câu trắc nghiệm từ tóm tắt không cần suy luận sâu, giữ chi phí thấp
   });
 
   const parsed = response.output_parsed;
