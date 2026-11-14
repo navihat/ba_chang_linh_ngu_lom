@@ -14,6 +14,13 @@ export type TopicSignals = {
   slidePages: number[]; // trang slide liên quan
 };
 
+// Đoạn trích nguyên văn từ tài liệu, để người học tự đối chiếu
+export type Quote = {
+  source: string; // tên file
+  page: number; // số trang, 0 nếu không rõ
+  text: string;
+};
+
 export type Topic = {
   id: string;
   title: string;
@@ -21,6 +28,7 @@ export type Topic = {
   summary: string; // tóm tắt cô đọng, mỗi ý một dòng
   signals: TopicSignals;
   estMinutes: number; // thời gian ôn ước tính
+  quotes?: Quote[]; // không bắt buộc: môn mẫu và kết quả cũ không có
 };
 
 // Kết quả POST /analyze
